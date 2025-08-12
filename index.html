@@ -1,49 +1,57 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>語彙</title>
+  <title>Vocabulary App</title>
   <style>
     body {
-      font-family: "Helvetica", sans-serif;
+      font-family: "Segoe UI", "Helvetica", sans-serif;
       margin: 0;
       padding: 0;
-      background: #f0f8ff;
+      background: #121212;
+      color: #e0e0e0;
     }
-
     .container {
       max-width: 500px;
       margin: 0 auto;
       padding: 24px;
+      background: #1e1e1e;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
     }
-
     h1 {
       text-align: center;
-      font-size: 24px;
+      font-size: 26px;
       margin-bottom: 24px;
+      color: #ffffff;
     }
-
     input, button {
       width: 100%;
       padding: 14px;
       margin-bottom: 12px;
       font-size: 18px;
       border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-
-    button {
-      background: #007bff;
-      color: white;
       border: none;
+      box-sizing: border-box;
+      background: #2c2c2c;
+      color: #ffffff;
     }
-
+    input::placeholder {
+      color: #aaa;
+    }
+    button {
+      background: #295483;
+      color: white;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #1c3a5a;
+    }
     .delete-btn {
       width: 40px;
       height: 40px;
-      background: #dc3545;
+      background: #ff4d4d;
       color: white;
       border: none;
       border-radius: 8px;
@@ -51,80 +59,76 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      vertical-align: middle;
+      transition: background 0.3s;
     }
-
+    .delete-btn:hover {
+      background: #cc0000;
+    }
     #word {
-      font-size: 22px;
+      font-size: 80px;
       font-weight: bold;
       text-align: center;
-      margin-bottom: 12px;
+      margin-top: -12px;
+      margin-bottom: 20px;
+      color: #00bfff;
     }
-
     #result {
       text-align: center;
       font-weight: bold;
       font-size: 18px;
       margin-top: 12px;
     }
-
     #message {
       text-align: center;
-      color: gray;
+      color: #aaa;
       font-size: 16px;
       margin-bottom: 12px;
       height: 20px;
     }
-
-    .section {
-      margin-bottom: 32px;
-    }
-
-    .view {
-      display: none;
-    }
-
-    .active {
-      display: block;
-    }
-
     .nav-btns {
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
     }
-
     .nav-btns button {
       flex: 1;
       font-size: 16px;
+      background: #333;
+      border: 1px solid #555;
     }
-
+    .nav-btns button:hover {
+      background: #444;
+    }
+    .view {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
     .list-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 12px 0;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #333;
       font-size: 18px;
     }
-
     .list-word {
       flex: 1;
-      background: #e0f0ff;
+      background: #2a2a2a;
       padding: 8px 12px;
       border-radius: 8px;
       margin-right: 20px;
+      color: #ffffff;
     }
-
     .list-meaning {
       flex: 2;
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      color: #555;
+      color: #ccc;
       gap: 4px;
     }
-
     .list-meaning span {
       line-height: 40px;
     }
@@ -132,32 +136,31 @@
 </head>
 <body>
   <div class="container">
-    <h1>vocabulary</h1>
-
+    <h1>Vocabulary App</h1>
     <div class="nav-btns">
-      <button onclick="switchView('register')">登録</button>
-      <button onclick="switchView('quiz')">クイズ</button>
-      <button onclick="switchView('list')">一覧</button>
+      <button onclick="switchView('register')">Add Word</button>
+      <button onclick="switchView('quiz')">Quiz</button>
+      <button onclick="switchView('list')">Word List</button>
     </div>
 
-    <!-- 登録画面 -->
+    <!-- Register View -->
     <div id="register" class="view active">
-      <input type="text" id="new-word" placeholder="英単語を入力" />
-      <input type="text" id="new-meaning" placeholder="意味を入力" />
+      <input type="text" id="new-word" placeholder="English Word" />
+      <input type="text" id="new-meaning" placeholder="Meaning in Japanese" />
       <div id="message"></div>
-      <button id="add-btn">単語を登録</button>
+      <button id="add-btn">Add Word</button>
     </div>
 
-    <!-- クイズ画面 -->
+    <!-- Quiz View -->
     <div id="quiz" class="view">
-      <p id="word">単語が表示されます</p>
-      <input type="text" id="answer" placeholder="意味を入力" />
-      <button id="check-btn">答え合わせ</button>
+      <p id="word">No words registered</p>
+      <input type="text" id="answer" placeholder="Type the meaning" />
+      <button id="check-btn">Check Answer</button>
       <p id="result"></p>
-      <button id="next-btn">次の単語</button>
+      <button id="next-btn">Next</button>
     </div>
 
-    <!-- 一覧画面 -->
+    <!-- List View -->
     <div id="list" class="view">
       <div id="word-list"></div>
     </div>
@@ -201,7 +204,7 @@
 
     function showWord() {
       if (words.length === 0) {
-        wordElement.textContent = "単語が登録されていません";
+        wordElement.textContent = "No words registered";
         return;
       }
       wordElement.textContent = words[currentIndex].word;
@@ -226,7 +229,7 @@
         newWordInput.value = "";
         newMeaningInput.value = "";
         newWordInput.focus();
-        showMessage("✅ 登録しました");
+        showMessage("✅ Word added");
         if (words.length === 1) showWord();
       }
     }
@@ -242,11 +245,11 @@
       const correctAnswer = words[currentIndex].meaning;
 
       if (userAnswer === correctAnswer) {
-        resultElement.textContent = "✅ 正解！";
-        resultElement.style.color = "green";
+        resultElement.textContent = "✅ Correct!";
+        resultElement.style.color = "lightgreen";
       } else {
-        resultElement.textContent = `❌ 不正解。正しくは「${correctAnswer}」`;
-        resultElement.style.color = "red";
+        resultElement.textContent = `❌ Incorrect. "${correctAnswer}"`;
+        resultElement.style.color = "tomato";
       }
     });
 
@@ -266,7 +269,7 @@
 
     function renderList() {
       if (words.length === 0) {
-        wordListDiv.innerHTML = "<p>まだ登録されていません。</p>";
+        wordListDiv.innerHTML = "<p>No words registered yet.</p>";
         return;
       }
 
@@ -277,7 +280,7 @@
             <div class="list-word">${item.word}</div>
             <div class="list-meaning">
               <span>${item.meaning}</span>
-              <button class="delete-btn" onclick="deleteWord(${index})">×</button>
+              <button class="delete-btn" onclick="deleteWord(${index})">✕</button>
             </div>
           </div>
         `;
@@ -285,7 +288,8 @@
       wordListDiv.innerHTML = html;
     }
 
-    showWord();
+    // Initial display
+    if (words.length > 0) showWord();
   </script>
 </body>
 </html>
