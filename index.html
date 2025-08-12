@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>英単語アプリ</title>
+  <style>
+    body {
+      font-family: "Helvetica", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f8ff;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 24px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 12px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+    }
+
+    .delete-btn {
+      width: 40px;
+      height: 40px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+    }
+
+    #word {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    #result {
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 12px;
+    }
+
+    #message {
+      text-align: center;
+      color: gray;
+      font-size: 16px;
+      margin-bottom: 12px;
+      height: 20px;
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    .nav-btns {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .nav-btns button {
+      flex: 1;
+      font-size: 16px;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #ddd;
+      font-size: 18px;
+    }
+
+    .list-word {
+      flex: 1;
+      background: #e0f0ff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-right: 20px;
+    }
+
+    .list-meaning {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      color: #555;
+      gap: 4px;
+    }
+
+    .list-meaning span {
+      line-height: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>英単語アプリ</h1>
+
+    <div class="nav-btns">
+      <button onclick="switchView('register')">登録</button>
+      <button onclick="switchView('quiz')">クイズ</button>
+      <button onclick="switchView('list')">一覧</button>
+    </div>
+
+    <!-- 登録画面 -->
+    <div id="register" class="view active">
+      <input type="text" id="new-word" placeholder="英単語を入力" />
+      <input type="text" id="new-meaning" placeholder="意味を入力" />
+      <div id="message"></div>
+      <button id="add-btn">単語を登録</button>
+    </div>
+
+    <!-- クイズ画面 -->
+    <div id="quiz" class="view">
+      <p id="word">単語が表示されます</p>
+      <input type="text" id="answer" placeholder="意味を入力" />
+      <button id="check-btn">答え合わせ</button>
+      <p id="result"></p>
+      <button id="next-btn">次の単語</button>
+    </div>
+
+    <!-- 一覧画面 -->
+    <div id="list" class="view">
+      <div id="word-list"></div>
+    </div>
+  </div>
+
+  <script>
+    let words = JSON.parse(localStorage.getItem("words")) || [];
+    let currentIndex = 0;
+
+    const views = {
+      register: document.getElementById("register"),
+      quiz: document.getElementById("quiz"),
+      list: document.getElementById("list")
+    };
+
+    function switchView(name) {
+      for (let key in views) {
+        views[key].classList.remove("active");
+      }
+      views[name].classList.add("active");
+      if (name === "list") renderList();
+      if (name === "quiz") showWord();
+    }
+
+    const wordElement = document.getElementById("word");
+    const answerInput = document.getElementById("answer");
+    const resultElement = document.getElementById("result");
+    const checkBtn = document.getElementById("check-btn");
+    const nextBtn = document.getElementById("next-btn");
+
+    const newWordInput = document.getElementById("new-word");
+    const newMeaningInput = document.getElementById("new-meaning");
+    const addBtn = document.getElementById("add-btn");
+    const messageElement = document.getElementById("message");
+
+    const wordListDiv = document.getElementById("word-list");
+
+    function saveWords() {
+      localStorage.setItem("words", JSON.stringify(words));
+    }
+
+    function showWord() {
+      if (words.length === 0) {
+        wordElement.textContent = "単語が登録されていません";
+        return;
+      }
+      wordElement.textContent = words[currentIndex].word;
+      answerInput.value = "";
+      resultElement.textContent = "";
+    }
+
+    function showMessage(text) {
+      messageElement.textContent = text;
+      setTimeout(() => {
+        messageElement.textContent = "";
+      }, 2000);
+    }
+
+    function addWord() {
+      const newWord = newWordInput.value.trim();
+      const newMeaning = newMeaningInput.value.trim();
+
+      if (newWord && newMeaning) {
+        words.push({ word: newWord, meaning: newMeaning });
+        saveWords();
+        newWordInput.value = "";
+        newMeaningInput.value = "";
+        newWordInput.focus();
+        showMessage("✅ 登録しました");
+        if (words.length === 1) showWord();
+      }
+    }
+
+    addBtn.addEventListener("click", addWord);
+    newMeaningInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addWord();
+    });
+
+    checkBtn.addEventListener("click", () => {
+      if (words.length === 0) return;
+      const userAnswer = answerInput.value.trim();
+      const correctAnswer = words[currentIndex].meaning;
+
+      if (userAnswer === correctAnswer) {
+        resultElement.textContent = "✅ 正解！";
+        resultElement.style.color = "green";
+      } else {
+        resultElement.textContent = `❌ 不正解。正しくは「${correctAnswer}」`;
+        resultElement.style.color = "red";
+      }
+    });
+
+    nextBtn.addEventListener("click", () => {
+      if (words.length === 0) return;
+      currentIndex = (currentIndex + 1) % words.length;
+      showWord();
+    });
+
+    function deleteWord(index) {
+      words.splice(index, 1);
+      saveWords();
+      renderList();
+      if (currentIndex >= words.length) currentIndex = 0;
+      showWord();
+    }
+
+    function renderList() {
+      if (words.length === 0) {
+        wordListDiv.innerHTML = "<p>まだ登録されていません。</p>";
+        return;
+      }
+
+      let html = "";
+      words.forEach((item, index) => {
+        html += `
+          <div class="list-item">
+            <div class="list-word">${item.word}</div>
+            <div class="list-meaning">
+              <span>${item.meaning}</span>
+              <button class="delete-btn" onclick="deleteWord(${index})">×</button>
+            </div>
+          </div>
+        `;
+      });
+      wordListDiv.innerHTML = html;
+    }
+
+    showWord();
+  </script>
+</body>
+</html>
